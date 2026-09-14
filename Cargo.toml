@@ -1,0 +1,18 @@
+[package]
+name = "apkaudio-maclookup"
+version = "0.1.0"
+edition.workspace = true
+workspace = "../.."
+
+# The only crate here that talks to the public internet, and it does so under a
+# hard budget: macvendors.com allows 1000 requests a day at 1 per second with no
+# key. ureq rather than reqwest because every caller is a blocking discovery
+# thread — there is no runtime to borrow, and one GET does not justify pulling
+# tokio into an agent that captures raw Ethernet.
+[dependencies]
+apkaudio-contracts = { path = "../../contracts/rust" }
+ureq = "2.12"
+
+[[bin]]
+name = "mac-lookup"
+path = "src/bin/mac-lookup.rs"
