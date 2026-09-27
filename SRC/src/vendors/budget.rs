@@ -37,12 +37,7 @@ impl MacVendors {
                 let (lock, _) = &*self.shared;
                 let Ok(mut shared) = lock.lock() else { return false };
 
-                let now_day = today();
-                if now_day != shared.day {
-                    shared.day = now_day;
-                    shared.spent = 0;
-                    shared.dirty = true;
-                }
+                shared.roll_day(today());
                 if shared.spent >= DAILY_BUDGET {
                     return false;
                 }

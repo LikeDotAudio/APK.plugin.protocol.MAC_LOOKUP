@@ -26,12 +26,7 @@ impl MacVendors {
                         return;
                     }
                     // A new day restores the allowance.
-                    let now = today();
-                    if now != shared.day {
-                        shared.day = now;
-                        shared.spent = 0;
-                        shared.dirty = true;
-                    }
+                    shared.roll_day(today());
                     if shared.spent < DAILY_BUDGET {
                         if let Some(oui) = shared.queue.pop_front() {
                             break oui;

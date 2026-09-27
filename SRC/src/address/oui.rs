@@ -3,6 +3,7 @@
 //! The 3-byte IEEE block: parse, from_ipv6, parse_exact, Display.
 
 use super::ipv6::expand_ipv6;
+use super::{assignable, hex_nibbles};
 
 /// One IEEE-assigned block: the first three bytes of a hardware address.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -39,11 +40,7 @@ impl Oui {
     /// * **all zero** — the "no address" placeholder several of these protocols
     ///   emit before they know their own identity.
     pub fn parse(raw: &str) -> Option<Self> {
-        let hex: Vec<u8> = raw
-            .chars()
-            .filter(|c| c.is_ascii_hexdigit())
-            .map(|c| c.to_digit(16).unwrap_or(0) as u8)
-            .collect();
+        let hex = hex_nibbles(raw);
 
         // 12 nibbles is a MAC-48, 16 an EUI-64. Anything else is not an address
         // that got mangled — it is a different kind of string, and guessing at
@@ -55,14 +52,8 @@ impl Oui {
         let byte = |i: usize| (hex[i * 2] << 4) | hex[i * 2 + 1];
         let oui = [byte(0), byte(1), byte(2)];
 
-        if oui[0] & 0x01 != 0 {
-            return None; // multicast / group address
-        }
-        if oui[0] & 0x02 != 0 {
-            return None; // locally administered
-        }
-        if oui == [0, 0, 0] {
-            return None;
+        if !assignable(&oui) {
+            return None; // multicast, locally administered, or all zero
         }
         Some(Oui(oui))
     }
@@ -107,7 +98,7 @@ impl Oui {
 
         let first = iid[0] ^ 0x02; // undo the modified-EUI-64 flip
         let oui = [first, iid[1], iid[2]];
-        if oui[0] & 0x01 != 0 || oui[0] & 0x02 != 0 || oui == [0, 0, 0] {
+        if !assignable(&oui) {
             return None;
         }
         Some(Oui(oui))
@@ -118,11 +109,7 @@ impl Oui {
     /// Separate from [`Oui::parse`], which insists on a whole address: a cache
     /// line is 6 hex digits and would fail that length check.
     pub(crate) fn parse_exact(raw: &str) -> Option<Self> {
-        let hex: Vec<u8> = raw
-            .chars()
-            .filter(|c| c.is_ascii_hexdigit())
-            .map(|c| c.to_digit(16).unwrap_or(0) as u8)
-            .collect();
+        let hex = hex_nibbles(raw);
         if hex.len() != 6 {
             return None;
         }

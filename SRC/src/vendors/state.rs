@@ -33,3 +33,14 @@ pub(super) struct Shared {
     pub(super) dirty: bool,
     pub(super) stop: bool,
 }
+
+impl Shared {
+    /// A new day restores the allowance: `now` is today's day number.
+    pub(super) fn roll_day(&mut self, now: u64) {
+        if now != self.day {
+            self.day = now;
+            self.spent = 0;
+            self.dirty = true;
+        }
+    }
+}

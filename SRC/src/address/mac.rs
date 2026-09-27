@@ -3,7 +3,7 @@
 //! The 6-byte hardware address: parse, from_ipv6, oui, Display.
 
 use super::ipv6::expand_ipv6;
-use super::Oui;
+use super::{assignable, hex_nibbles, Oui};
 
 /// A full 48-bit hardware address.
 ///
@@ -32,7 +32,7 @@ impl Mac {
             return None;
         }
         let mac = [iid[0] ^ 0x02, iid[1], iid[2], iid[5], iid[6], iid[7]];
-        if mac[0] & 0x01 != 0 || mac[0] & 0x02 != 0 || mac[..3] == [0, 0, 0] {
+        if !assignable(&mac) {
             return None;
         }
         Some(Mac(mac))
@@ -40,11 +40,7 @@ impl Mac {
 
     /// Any of the written forms, MAC-48 only — an EUI-64 is not an address.
     pub fn parse(raw: &str) -> Option<Self> {
-        let hex: Vec<u8> = raw
-            .chars()
-            .filter(|c| c.is_ascii_hexdigit())
-            .map(|c| c.to_digit(16).unwrap_or(0) as u8)
-            .collect();
+        let hex = hex_nibbles(raw);
         if hex.len() != 12 {
             return None;
         }
@@ -52,7 +48,7 @@ impl Mac {
         for (i, b) in mac.iter_mut().enumerate() {
             *b = (hex[i * 2] << 4) | hex[i * 2 + 1];
         }
-        if mac[0] & 0x01 != 0 || mac[0] & 0x02 != 0 || mac[..3] == [0, 0, 0] {
+        if !assignable(&mac) {
             return None;
         }
         Some(Mac(mac))
