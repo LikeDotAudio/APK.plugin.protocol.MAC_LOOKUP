@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Condvar, Mutex};
 
 use budget::today;
-use cache::{default_cache_path, load_cache};
+use cache::{default_cache_path, load_cache, seed};
 use state::Shared;
 
 mod budget;
@@ -30,21 +30,35 @@ pub struct MacVendors {
 impl MacVendors {
     /// Start with the default cache location.
     ///
-    /// `APKAUDIO_MAC_CACHE` overrides it; otherwise `mac_vendors.tsv` beside this
-    /// crate. Losing the file costs a day's budget, not correctness.
+    /// `APKAUDIO_MAC_CACHE` overrides it; otherwise an untracked `mac_vendors.tsv`
+    /// beside this crate. The baked-in seed (`mac_vendors.seed.tsv`) is loaded
+    /// first and the cache overlays it. Losing the file costs a day's budget,
+    /// not correctness.
     pub fn start() -> Self {
         let path = std::env::var_os("APKAUDIO_MAC_CACHE")
             .map(PathBuf::from)
             .unwrap_or_else(default_cache_path);
-        Self::start_with_cache(Some(path))
+        Self::start_inner(Some(path), true)
     }
 
-    /// Start against a specific cache file, or none at all (tests).
+    /// Start against a specific cache file, or none at all (tests). No seed: a
+    /// test sees exactly what it put there.
     pub fn start_with_cache(path: Option<PathBuf>) -> Self {
-        let (known, spent, day) = path
+        Self::start_inner(path, false)
+    }
+
+    /// How many OUIs the baked-in seed names. Reads nothing outside the binary.
+    pub fn seed_len() -> usize {
+        seed().len()
+    }
+
+    fn start_inner(path: Option<PathBuf>, seeded: bool) -> Self {
+        let (cached, spent, day) = path
             .as_deref()
             .map(load_cache)
             .unwrap_or_else(|| (HashMap::new(), 0, today()));
+        let mut known = if seeded { seed() } else { HashMap::new() };
+        known.extend(cached);
 
         let shared = Arc::new((
             Mutex::new(Shared {

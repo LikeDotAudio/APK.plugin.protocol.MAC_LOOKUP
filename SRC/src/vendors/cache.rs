@@ -11,7 +11,9 @@ use super::state::Known;
 use super::MacVendors;
 use crate::Oui;
 
-/// `mac_vendors.tsv` beside this crate's source.
+/// `mac_vendors.tsv` beside this crate's source — untracked (see `.gitignore`);
+/// the tracked file is `mac_vendors.seed.tsv`, which is only ever read, and only
+/// at compile time.
 ///
 /// Anchored to the crate rather than to the working directory, because the
 /// directory a process starts in is not a property of the cache. Eight agents
@@ -84,14 +86,28 @@ impl MacVendors {
     }
 }
 
+/// The tracked seed, compiled in. Read-only by construction: it is a string in
+/// the binary, so nothing at run time can rewrite the file git tracks, and a
+/// self test can prove the table loads without touching the disk.
+pub(super) const SEED: &str = include_str!("../../mac_vendors.seed.tsv");
+
+/// The baked-in seed as a table. Budget lines, if any, are ignored.
+pub(super) fn seed() -> HashMap<Oui, Known> {
+    parse_cache(SEED).0
+}
+
 pub(super) fn load_cache(path: &Path) -> (HashMap<Oui, Known>, u32, u64) {
+    match std::fs::read_to_string(path) {
+        Ok(text) => parse_cache(&text),
+        Err(_) => (HashMap::new(), 0, today()),
+    }
+}
+
+fn parse_cache(text: &str) -> (HashMap<Oui, Known>, u32, u64) {
     let mut known = HashMap::new();
     let mut spent = 0;
     let mut day = today();
 
-    let Ok(text) = std::fs::read_to_string(path) else {
-        return (known, spent, day);
-    };
     for line in text.lines() {
         if let Some(rest) = line.strip_prefix("#budget\t") {
             let mut parts = rest.split('\t');
@@ -143,5 +159,15 @@ mod tests {
         assert_eq!(known.get(&Oui([0x00, 0x07, 0xF5])), Some(&Known::Unassigned));
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_seed_is_baked_in_and_is_not_the_writable_cache() {
+        assert!(!seed().is_empty(), "the baked seed parsed to nothing");
+        assert_ne!(
+            default_cache_path().file_name(),
+            Some(std::ffi::OsStr::new("mac_vendors.seed.tsv")),
+            "the default cache must never be the tracked seed"
+        );
     }
 }

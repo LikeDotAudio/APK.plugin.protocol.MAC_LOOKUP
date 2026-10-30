@@ -23,18 +23,18 @@ Was `APK:BareMetal/PLUGINS/PLUGIN:protocol:MAC_LOOKUP`.
 | `SRC/src/bin/mac-lookup.rs` | `mac-lookup [--cached] [MAC ...]`, or addresses on stdin |
 | `SRC/src/self_test.rs` | the self test, module name `maclookup` |
 
-**The cache file.** `APKAUDIO_MAC_CACHE` names it; without it, `mac_vendors.tsv` beside `Cargo.toml` (`CARGO_MANIFEST_DIR`, baked in at compile time), or `./mac_vendors.tsv` when that directory is gone. The `SRC/mac_vendors.tsv` in this repository is that default file — a seed of seven OUIs that grows whenever the library runs from a checkout. In a plugin container `DISCOVERY.Engine/Docker/plugin-base.yml` mounts the named volume `apk-audio-mac-lookup-cache` at `/var/lib/apkaudio/mac`, so every plugin shares one cache and asks the API once.
+**The seed and the cache.** `SRC/mac_vendors.seed.tsv` is tracked and read-only: it is compiled into the binary (`include_str!`, `SRC/src/vendors/cache.rs` `SEED`) and loaded first by `MacVendors::start()`. The writable cache overlays it: `APKAUDIO_MAC_CACHE` names it; without it, an untracked `mac_vendors.tsv` beside `Cargo.toml` (`CARGO_MANIFEST_DIR`, baked in at compile time; ignored by `.gitignore`), or `./mac_vendors.tsv` when that directory is gone. In a plugin container `DISCOVERY.Engine/Docker/plugin-base.yml` mounts the named volume `apk-audio-mac-lookup-cache` at `/var/lib/apkaudio/mac`, so every plugin shares one cache and asks the API once. The self test checks the baked seed, not the disk, so an empty cache volume does not fail it.
 
 ## Build, run, test
 
 ```sh
 cd PODS/POD.THICK/DISCOVERY.Engine/SRC
-cargo test -p apkaudio-maclookup              # 25 unit tests
+cargo test -p apkaudio-maclookup              # 26 unit tests
 cargo run -p apkaudio-maclookup --bin mac-lookup -- 00:0A:92:FF:FE:01:56:A3
 cargo run -p apkaudio-maclookup --bin mac-lookup -- --cached
 ```
 
-Checked 2026-10-30: `cargo test -p apkaudio-maclookup` — 25 passed; `mac-lookup --help` prints its usage.
+Checked 2026-10-30: `cargo test -p apkaudio-maclookup` — 26 passed; `mac-lookup --help` prints its usage.
 
 ## Philosophy
 

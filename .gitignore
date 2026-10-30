@@ -1,0 +1,4 @@
+# The writable vendor cache a checkout run creates beside Cargo.toml; the
+# tracked, read-only seed is SRC/mac_vendors.seed.tsv (compiled in).
+SRC/mac_vendors.tsv
+SRC/mac_vendors.tsv.tmp

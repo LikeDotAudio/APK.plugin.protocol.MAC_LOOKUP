@@ -75,14 +75,15 @@ pub fn self_test(depth: Depth) -> Report {
     report.record(Check::from_result(
         "the_vendor_table_loaded",
         Depth::Own,
-        "the bundled OUI table has entries",
+        "the OUI seed baked into this binary has entries",
         {
-            let table = crate::MacVendors::start();
-            let known = table.known().len();
-            if known > 0 {
+            // The compiled-in seed, not the cache on disk: at Depth::Own nothing
+            // outside what is baked in may be read, and a container whose cache
+            // volume is still empty is not a broken crate.
+            if crate::MacVendors::seed_len() > 0 {
                 Ok(())
             } else {
-                Err("the OUI table resolved zero vendors".to_string())
+                Err("the baked OUI seed resolved zero vendors".to_string())
             }
         },
     ));
