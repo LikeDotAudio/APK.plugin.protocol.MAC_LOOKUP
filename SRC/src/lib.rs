@@ -32,13 +32,15 @@
 //!
 //! # Who calls this
 //!
-//! **Eight crates in this workspace depend on it**, which makes it the one
-//! member here whose failure is not local: `apkaudio-AppleTV`,
-//! `apkaudio-AVB-Milan`, `apkaudio-ChromeCast`, `apkaudio-Dante`,
-//! `apkaudio-dnssd`, `apkaudio-nmos`, `apkaudio-printers` and `apkaudio-ptp`.
-//! A library whose callers are invisible gets changed as though it had none —
-//! a widened signature or a stricter parse here costs eight compiles, and
-//! `./.apk.scripts/check.sh comprotocols` is what will say so.
+//! **Thirteen crates in this workspace depend on it**, which makes it the one
+//! member here whose failure is not local: `apkaudio-appletv`,
+//! `apkaudio-chromecast`, `apkaudio-dante`, `apkaudio-dnssd`,
+//! `apkaudio-milan`, `apkaudio-netbox`, `apkaudio-netgear`, `apkaudio-nmos`,
+//! `apkaudio-nmos-control`, `apkaudio-ping`, `apkaudio-playstation`,
+//! `apkaudio-printers` and `apkaudio-ptp`. A library whose callers are
+//! invisible gets changed as though it had none — a widened signature or a
+//! stricter parse here costs thirteen compiles, and `cargo check --workspace`
+//! in `PODS/POD.THICK/DISCOVERY.Engine/SRC` is what will say so.
 //!
 //! ```no_run
 //! let vendors = apkaudio_maclookup::MacVendors::start();
