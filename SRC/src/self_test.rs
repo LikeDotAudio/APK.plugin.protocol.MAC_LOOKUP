@@ -27,17 +27,18 @@ use apkaudio_contracts::self_test::{Check, Depth, Report};
 
 /// The topic segment this crate owns — the `{proto}` in
 /// `APK.audio/System/Protocols/{proto}/…`, and the name its report is filed
-/// under. It must match the section in `config.ini`, which is what
-/// `config_section_still_names_this_module` below asserts.
+/// under. This crate carries no `config.ini`, so it has no
+/// `config_section_still_names_this_module` check — there is no section here
+/// for the name to drift from.
 pub const MODULE: &str = "maclookup";
 
 /// Everything this crate can prove about itself at `depth`.
 pub fn self_test(depth: Depth) -> Report {
     let mut report = Report::new(MODULE, depth);
 
-    // Every crate answers these two. The first proves this crate can address
-    // its own mailbox at all; the second proves the name it addresses it with
-    // is the one the config walk publishes it under.
+    // The first proves this crate can address its own mailbox at all. The
+    // config-section check the crates with a `config.ini` carry is absent on
+    // purpose: there is no `config.ini` here to name the module.
     report.record(Check::from_result(
         "landing_spots_build",
         Depth::Own,
