@@ -4,7 +4,7 @@ Is `LIB.MAC_LOOKUP` deployed? Written by `.apk.scripts/smoke.py` from the module
 
 ← [Wiki home](../README.md)
 
-**✅ PASS** — 1/1 checks, since 2026-10-30 12:50 EDT
+**✅ PASS** — 1/1 checks, since 2026-10-30 12:51 EDT
 
 | Check | Target | Result | Detail |
 |---|---|---|---|
@@ -12,4 +12,4 @@ Is `LIB.MAC_LOOKUP` deployed? Written by `.apk.scripts/smoke.py` from the module
 
 Re-run: `python3 .apk.scripts/smoke.py PODS/POD.THICK/LIBRARY/LIB.MAC_LOOKUP`
 
-<!-- smoke:sig 66e532e7509f since 2026-10-30 12:50 EDT -->
+<!-- smoke:sig 756ac2cf8069 since 2026-10-30 12:51 EDT -->
