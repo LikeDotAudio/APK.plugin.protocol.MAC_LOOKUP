@@ -1,5 +1,7 @@
 # APK:lib:MAC_LOOKUP
 
+**Wiki:** [Documentation/README.md](Documentation/README.md) — principles, architecture, delivery.
+
 MAC vendor lookup — who made this device, from the first 24 bits of its hardware address — as a Rust library, cache first, with the public API https://api.macvendors.com behind it under a hard budget.
 
 | | |
@@ -23,7 +25,7 @@ Was `APK:BareMetal/PLUGINS/PLUGIN:protocol:MAC_LOOKUP`.
 | `SRC/src/bin/mac-lookup.rs` | `mac-lookup [--cached] [MAC ...]`, or addresses on stdin |
 | `SRC/src/self_test.rs` | the self test, module name `maclookup` |
 
-**The seed and the cache.** `SRC/mac_vendors.seed.tsv` is tracked and read-only: it is compiled into the binary (`include_str!`, `SRC/src/vendors/cache.rs` `SEED`) and loaded first by `MacVendors::start()`. The writable cache overlays it: `APKAUDIO_MAC_CACHE` names it; without it, an untracked `mac_vendors.tsv` beside `Cargo.toml` (`CARGO_MANIFEST_DIR`, baked in at compile time; ignored by `.gitignore`), or `./mac_vendors.tsv` when that directory is gone. In a plugin container `DISCOVERY.Engine/Docker/plugin-base.yml` mounts the named volume `apk-audio-mac-lookup-cache` at `/var/lib/apkaudio/mac`, so every plugin shares one cache and asks the API once. The self test checks the baked seed, not the disk, so an empty cache volume does not fail it.
+**The seed and the cache.** `SRC/mac_vendors.seed.tsv` is tracked and read-only: it is compiled into the binary (`include_str!`, `SRC/src/vendors/cache.rs` `SEED`) and loaded first by `MacVendors::start()`. The writable cache overlays it: `APKAUDIO_MAC_CACHE` names it; without it, an untracked `mac_vendors.tsv` beside `Cargo.toml` (`CARGO_MANIFEST_DIR`, baked in at compile time; ignored by `.gitignore`), or `./mac_vendors.tsv` when that directory is gone. In a plugin container `DISCOVERY.Engine/Docker/plugin-base.yml` mounts the named volume `apk-audio-mac-lookup-cache` at `/var/lib/apkaudio/mac` (with `APKAUDIO_MAC_CACHE=/var/lib/apkaudio/mac/oui_cache.txt` set by the image), so every plugin shares one cache and asks the API once. The self test checks the baked seed, not the disk, so an empty cache volume does not fail it.
 
 ## Build, run, test
 
