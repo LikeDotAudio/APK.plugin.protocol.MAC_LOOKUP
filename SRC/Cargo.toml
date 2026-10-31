@@ -1,6 +1,6 @@
 [package]
 name = "apkaudio-maclookup"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 # The only crate here that talks to the public internet, and it does so under a
 # hard budget: macvendors.com allows 1000 requests a day at 1 per second with no
