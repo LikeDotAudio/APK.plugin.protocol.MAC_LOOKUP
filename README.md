@@ -9,7 +9,7 @@ MAC vendor lookup — who made this device, from the first 24 bits of its hardwa
 | **Recipe** | none — a library, not a container: it is linked into the binaries that use it |
 | **Source** | `SRC/` (this repository — https://github.com/LikeDotAudio/APK.plugin.protocol.MAC_LOOKUP.git) — crate `apkaudio-maclookup`; bin `mac-lookup` is the hand tool |
 | **Used by** | thirteen plugin crates: APPLETV, CHROMECAST, DANTE, DNSSD, MILAN, NETBOX, NETGEAR, NMOS, NMOS_CONTROL, PING, PLAYSTATION, PRINTERS, PTP. Not the orchestrator — `ORCHESTRATOR:hunter:VISA/Cargo.toml` says so |
-| **Workspace** | none of its own — builds standalone (`cargo test` in `SRC/`, SDK by tag `sdk-v0.5`); the DISCOVERY.Engine workspace reaches it through the link `SRC/members/LIB.MAC_LOOKUP` |
+| **Workspace** | none of its own — builds standalone (`cargo test` in `SRC/`, SDK by tag `sdk-v0.7`); the DISCOVERY.Engine workspace reaches it through the link `SRC/members/LIB.MAC_LOOKUP` |
 | **Family / Category** | LIBRARY — address/vendor library; no bus surface, no `config.ini`, no port. The only crate in the workspace that talks to the public internet |
 
 Was `APK:BareMetal/PLUGINS/PLUGIN:protocol:MAC_LOOKUP`.
