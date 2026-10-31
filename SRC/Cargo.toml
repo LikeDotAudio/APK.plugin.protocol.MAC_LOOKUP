@@ -1,6 +1,6 @@
 [package]
 name = "apkaudio-maclookup"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 # The only crate here that talks to the public internet, and it does so under a
 # hard budget: macvendors.com allows 1000 requests a day at 1 per second with no
@@ -8,7 +8,7 @@ edition = "2024"
 # thread — there is no runtime to borrow, and one GET does not justify pulling
 # tokio into an agent that captures raw Ethernet.
 [dependencies]
-apkaudio-contracts = { git = "https://github.com/LikeDotAudio/APK.plugin.SDK", tag = "sdk-v0.7" }
+apkaudio-contracts = { git = "https://github.com/LikeDotAudio/APK.plugin.SDK", tag = "sdk-v0.9" }
 ureq = "2.12"
 
 [[bin]]
