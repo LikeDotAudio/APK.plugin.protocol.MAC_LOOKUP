@@ -2,7 +2,7 @@
 
 ← [Wiki home](../README.md)
 
-Crate `apkaudio-maclookup` (`SRC/Cargo.toml`, member of `DISCOVERY.Engine/SRC`), dependency `ureq` for one blocking GET, and the hand tool `mac-lookup`. No bus surface, no `config.ini`, no port; the only workspace crate that reaches the public internet (`https://api.macvendors.com/<OUI>`, `vendors/fetch.rs`).
+Crate `apkaudio-maclookup` (`SRC/Cargo.toml`, standalone; a member of `DISCOVERY.Engine/SRC` through `SRC/members/LIB.MAC_LOOKUP`), dependency `ureq` for one blocking GET, and the hand tool `mac-lookup`. No bus surface, no `config.ini`, no port; the only workspace crate that reaches the public internet (`https://api.macvendors.com/<OUI>`, `vendors/fetch.rs`).
 
 ## API
 
