@@ -23,14 +23,21 @@ pub(super) struct Shared {
     /// In the queue or in flight — so a device seen on every packet does not
     /// enqueue itself a thousand times before the first answer lands.
     pub(super) pending: HashSet<Oui>,
-    /// Requests spent today, and the day they were spent on.
+    /// Requests spent today, and the day they were spent on. With a shared
+    /// file this mirrors the file's tally (updated whenever the gate reads it),
+    /// so the worker idles when the VOLUME's allowance is gone.
     pub(super) spent: u32,
     pub(super) day: u64,
     /// When the last request left, so the rate gate is shared. The worker and a
     /// CLI call go through the same door — a tool run while an agent is
     /// resolving must not double the rate and earn both of them a 429.
+    /// Used only when there is no shared file (tests, or the file's lock
+    /// could not be taken); with a file, the spacing lives in it (`#next`).
     pub(super) last_request: Option<std::time::Instant>,
-    pub(super) dirty: bool,
+    /// Answers this process got from the API and has not yet merged into the
+    /// shared file. Only these are written — never the whole table — so one
+    /// process cannot erase another's answers.
+    pub(super) learned: HashMap<Oui, Known>,
     pub(super) stop: bool,
 }
 
@@ -40,7 +47,6 @@ impl Shared {
         if now != self.day {
             self.day = now;
             self.spent = 0;
-            self.dirty = true;
         }
     }
 }

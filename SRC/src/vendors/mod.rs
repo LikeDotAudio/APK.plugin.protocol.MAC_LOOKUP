@@ -30,12 +30,14 @@ pub struct MacVendors {
 impl MacVendors {
     /// Start with the default cache location.
     ///
-    /// `APKAUDIO_MAC_CACHE` overrides it; otherwise an untracked `mac_vendors.tsv`
-    /// beside this crate. The baked-in seed (`mac_vendors.seed.tsv`) is loaded
-    /// first and the cache overlays it. Losing the file costs a day's budget,
-    /// not correctness.
+    /// `APKAUDIO_MAC_CACHE` names the file (every image sets it); otherwise the
+    /// per-user cache dir (`$XDG_CACHE_HOME` or `~/.cache`)`/apkaudio/mac_vendors.tsv`.
+    /// The baked-in seed (`mac_vendors.seed.tsv`) is loaded first and the cache
+    /// overlays it. Any number of processes may share the file — see
+    /// `vendors/cache.rs`. Losing it costs a day's budget, not correctness.
     pub fn start() -> Self {
         let path = std::env::var_os("APKAUDIO_MAC_CACHE")
+            .filter(|v| !v.is_empty())
             .map(PathBuf::from)
             .unwrap_or_else(default_cache_path);
         Self::start_inner(Some(path), true)
@@ -53,10 +55,9 @@ impl MacVendors {
     }
 
     fn start_inner(path: Option<PathBuf>, seeded: bool) -> Self {
-        let (cached, spent, day) = path
-            .as_deref()
-            .map(load_cache)
-            .unwrap_or_else(|| (HashMap::new(), 0, today()));
+        let disk = path.as_deref().map(load_cache).unwrap_or_default();
+        let (cached, spent) = (disk.known, disk.spent);
+        let day = today();
         let mut known = if seeded { seed() } else { HashMap::new() };
         known.extend(cached);
 
@@ -68,7 +69,7 @@ impl MacVendors {
                 spent,
                 day,
                 last_request: None,
-                dirty: false,
+                learned: HashMap::new(),
                 stop: false,
             }),
             Condvar::new(),

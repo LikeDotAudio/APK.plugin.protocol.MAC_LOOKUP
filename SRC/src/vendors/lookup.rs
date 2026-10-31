@@ -2,6 +2,7 @@
 // MIT Licence. Free, for everyone, for ever. Full text in LICENSE at the root.
 //! The non-blocking and blocking questions callers ask.
 
+use super::budget::Slot;
 use super::fetch::{fetch, Fetched};
 use super::state::Known;
 use super::MacVendors;
@@ -126,8 +127,10 @@ impl MacVendors {
                 None => {}
             }
         }
-        if !self.take_slot() {
-            return None; // out of allowance for today
+        match self.take_slot(oui) {
+            Slot::Granted => {}
+            Slot::Spent => return None, // out of allowance for today
+            Slot::Known => return self.vendor_of(oui),
         }
         match fetch(oui) {
             Fetched::Vendor(name) => {
@@ -138,7 +141,11 @@ impl MacVendors {
                 self.remember(oui, Known::Unassigned);
                 None
             }
-            Fetched::Throttled | Fetched::Failed => None,
+            Fetched::Throttled => {
+                self.note_throttled();
+                None
+            }
+            Fetched::Failed => None,
         }
     }
 

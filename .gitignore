@@ -1,6 +1,8 @@
-# The writable vendor cache a checkout run creates beside Cargo.toml; the
-# tracked, read-only seed is SRC/mac_vendors.seed.tsv (compiled in).
+# The runtime cache no longer defaults into the checkout (it lives in the
+# per-user cache dir or at $APKAUDIO_MAC_CACHE); these stay ignored in case an
+# older build or a hand run put one here. The tracked, read-only seed is
+# SRC/mac_vendors.seed.tsv (compiled in).
 SRC/mac_vendors.tsv
-SRC/mac_vendors.tsv.tmp
+SRC/mac_vendors.tsv.*
 # A standalone `cargo check` writes this; the image builds from the engine's lock (PLAN-3397.01).
 /SRC/Cargo.lock

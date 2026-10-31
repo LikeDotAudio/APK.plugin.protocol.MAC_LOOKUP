@@ -5,7 +5,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use super::budget::{today, DAILY_BUDGET, THROTTLE_BACKOFF};
+use super::budget::{today, Slot, DAILY_BUDGET, THROTTLE_BACKOFF};
 use super::fetch::{fetch, Fetched};
 use super::state::Known;
 use super::MacVendors;
@@ -44,18 +44,27 @@ impl MacVendors {
 
             // The gate both charges the budget and enforces the spacing, so
             // there is no sleep at the bottom of this loop.
-            if !self.take_slot() {
-                self.requeue(oui);
-                std::thread::sleep(THROTTLE_BACKOFF);
-                continue;
+            match self.take_slot(oui) {
+                Slot::Granted => {}
+                // Another container answered it meanwhile: free.
+                Slot::Known => continue,
+                Slot::Spent => {
+                    self.requeue(oui);
+                    std::thread::sleep(THROTTLE_BACKOFF);
+                    continue;
+                }
             }
-            match fetch(oui) {
-                Fetched::Vendor(name) => self.remember(oui, Known::Vendor(name)),
+            let fetched = fetch(oui);
+            match &fetched {
+                Fetched::Vendor(name) => self.remember(oui, Known::Vendor(name.clone())),
                 Fetched::Unassigned => self.remember(oui, Known::Unassigned),
                 // Neither of these says anything about the OUI, so neither is
                 // cached — requeue and wait rather than remembering a wrong
                 // "unknown" that would never be retried.
                 Fetched::Throttled | Fetched::Failed => {
+                    if matches!(fetched, Fetched::Throttled) {
+                        self.note_throttled();
+                    }
                     self.requeue(oui);
                     std::thread::sleep(THROTTLE_BACKOFF);
                 }
