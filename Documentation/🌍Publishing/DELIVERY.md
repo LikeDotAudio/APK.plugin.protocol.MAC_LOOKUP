@@ -12,6 +12,11 @@ Test (the one check — no CI, by the root's deliberate choice): `cd PODS/POD.TH
 
 **Not automated:** no CI and no gate runs the tests (the check is the one command above); the plugin image's `--keep-going` would hide a compile failure behind stub binaries. The seed is grown by hand. No live URL.
 
+## Delivered 2026-10-31: portable file names (no `:` `|` or case twins)
+
+- The monorepo now checks out on Windows and macOS: no tracked name holds `<>:"|?*`, a trailing dot or space, a device name or a case-only twin. Colon folders became dot folders (the POD.x convention).
+- References to the renamed folders updated (`ORCHESTRATOR.hunter.VISA`). Docs/comments only, no behaviour change.
+
 ## Delivered from the 2026-10-30 audit
 
 - **Shared cache is safe for many writers** — the running-system bug (≈12 plugin containers in `apk-plugins:local` share `oui_cache.txt` on the `apk-audio-mac-lookup-cache` volume; each read it once and rewrote it whole, last writer won, and the 1000/day budget was counted per process). `SRC/src/vendors/cache.rs` `with_locked` now takes an exclusive `flock` on `<cache>.lock`, re-reads the file, merges, and writes via a per-process temp file + fsync + rename; `persist` writes only what this process learned (`Shared::learned`) and takes back what others learned; the budget (`#budget`) and the spacing / 429 back-off (`#next`, new line, skipped as a comment by older readers) are charged in the file under the lock (`budget.rs` `take_slot(oui) -> Slot`, `shared_gate`, `note_throttled`), and a queued OUI another container already answered is taken free (`Slot::Known`). No lock ⇒ falls back to the old in-memory gate. Verified: new tests `two_writers_merge_instead_of_overwriting`, `concurrent_writers_lose_nothing` (12 handles × 10), `the_budget_is_shared_through_the_file`, `the_spacing_is_shared_through_the_file`, `an_oui_answered_elsewhere_is_not_asked_again`, `budget_and_next_round_trip_and_old_files_still_parse`; `cargo test` in `SRC/` 35+1 pass; engine workspace `cargo test -p apkaudio-maclookup` 35+1 pass and `cargo check -p apkaudio-ping -p apkaudio-dnssd -p apkaudio-dante` clean. Reaches the running plugins on the next plugin image rebuild (`up-stack.sh DISCOVERY.Engine`, owner).
