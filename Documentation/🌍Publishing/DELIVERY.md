@@ -27,5 +27,11 @@ Test (the one check — no CI, by the root's deliberate choice): `cd PODS/POD.TH
 - **SDK repinned to `sdk-v0.7`** (336fbb5) — `apkaudio-contracts` by `tag = "sdk-v0.7"`. Verified 2026-10-31: `git archive HEAD:SRC` alone, `cargo test` against GitHub — 35 unit + 1 doc test pass.
 - **Released `0.3.0` on `sdk-v0.9`, tag `maclookup-v0.3.0`** (PLAN-3432.01, owner-authorised 2026-10-31) — `SRC/Cargo.toml` bumped 0.2.0 → 0.3.0 (MINOR: the `apkaudio-contracts` it re-exports in its types is now the one from `sdk-v0.9`) and takes the SDK by `tag = "sdk-v0.9"`. The `maclookup-v0.2.0` release was cut on `sdk-v0.6`, so every standalone consumer lock carried `apkaudio-contracts` twice; consumers now pin `tag = "maclookup-v0.3.0"`. Verified 2026-10-31: the tree alone (`git archive`, no `.cargo` patch), `cargo test` in `SRC/` against GitHub — 35 unit + 1 doc test pass; its lock holds one `apkaudio-contracts`.
 
+## Delivered 2026-11-11 – 2026-11-12
+
+From this repository's own commits (the commit message is the record):
+
+- pin sdk-v2.4 (ROAD-3731: contracts 2.4.0 published) (`9b7426e`)
+
 ## Releases
 - **Released `2.0.0`, tag `v2.0.0`** (2026-11-01, ROAD-3452, the owner's V2) — on `sdk-v2.0` (contracts 2.0.0); every manifest says 2.0.0; GitHub release `v2.0.0`.
